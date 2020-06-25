@@ -17,15 +17,14 @@ from keras.optimizers import Adam
 def load_data(data_dir, csv_name='driving_log.csv', imgs_dir='IMG'):
     csv_file = os.path.join(data_dir, csv_name)
     img_path = os.path.join(data_dir, imgs_dir)
-    
     dataset = list()
     with open(csv_file, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
             steering_center = float(row[3])
             # create adjusted steering measurements for the side camera images
-            steering_left = steering_center + .2
-            steering_right = steering_center - .2
+            steering_left = steering_center + 0.2
+            steering_right = steering_center - 0.2
             
             img_center = os.path.join(img_path, row[0].split('\\')[-1])
             img_left = os.path.join(img_path, row[1].split('\\')[-1])
@@ -52,7 +51,7 @@ def create_model(img_input_shape, rate=0.001):
     model.add(Conv2D(24, (5, 5), activation='relu', strides=(2, 2)))
     model.add(Conv2D(36, (5, 5), activation='relu', strides=(2, 2)))
     model.add(Conv2D(48, (5, 5), activation='relu', strides=(2, 2)))
-    model.add(Dropout(0.6))
+    model.add(Dropout(0.5))
     # convolution + flatten + dropuot
     model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(Conv2D(64, (3, 3), activation='relu'))
@@ -85,22 +84,22 @@ def dataGenerator(samples, batch_size=64):
                 angle = float(batch_sample[1])
                 angles.append(angle)
 
-                # randomly select images to flip
-                X_train = np.array(imgs)
-                y_train = np.array(angles)
-                flip_indices = np.random.choice(len(X_train), len(X_train)//2)
-                X_train[flip_indices] = np.fliplr(X_train[flip_indices])
-                y_train[flip_indices] = -y_train[flip_indices]
+            # randomly select images to flip
+            X_train = np.array(imgs)
+            y_train = np.array(angles)
+            flip_indices = np.random.choice(len(X_train), len(X_train)//2)
+            X_train[flip_indices] = np.fliplr(X_train[flip_indices])
+            y_train[flip_indices] = -y_train[flip_indices]
 
-                yield shuffle(X_train, y_train)
+            yield shuffle(X_train, y_train)
 
 # mail procedure
 def main():
     # data
-    dataset_dir = '../simulator_data'
+    dataset_dir = '../data'
     img_input_shape = (160, 320, 3)
-    learning_rate = 0.0001
-    batch_size = 512
+    learning_rate = 0.00009
+    batch_size = 32
     model_name = 'model.h5'
     
     ## Train steps
@@ -129,7 +128,7 @@ def main():
                                          workers=8,
                                          verbose=1,
                                          callbacks=[checkpoint, stopper],
-                                         epochs=10)
+                                         epochs=30)
     
     print(history_object.history.keys())
     #  Plot the training and validation loss for each epoch
