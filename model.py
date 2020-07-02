@@ -98,7 +98,7 @@ def main():
     # data
     dataset_dir = '../data'
     img_input_shape = (160, 320, 3)
-    learning_rate = 0.00009
+    learning_rate = 0.0001
     batch_size = 32
     model_name = 'model.h5'
     
